@@ -53,6 +53,7 @@ let writeData = function() {
                         .catch(err => {
                               console.error("Error writing data to Influx.");
                               console.error(err);
+                              console.log('Pinging known hosts...');
                               influx.ping(5000).then(hosts => {
                                     hosts.forEach(host => {
                                           if (host.online) {
@@ -60,6 +61,8 @@ let writeData = function() {
                                           }
                                           else {
                                                 console.log(`${host.url.host} is offline :(`);
+                                                console.log('this is the host:');
+                                                console.log(host);
                                           }
                                     })
                               });
