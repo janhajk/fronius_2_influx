@@ -25,8 +25,8 @@ var Meter = function() {
       axios.get(url)
          .then(function(response) {
             // handle success
-            console.log(response);
-            cb(null, response);
+            console.log(response.data.body);
+            cb(null, response.data.body);
          })
          .catch(function(error) {
             // handle error
