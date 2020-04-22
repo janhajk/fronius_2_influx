@@ -9,19 +9,7 @@
   "author": "janhajk@gmail.com",
   "private": true,
   "dependencies": {
-    "json-rpc2": "^1.0.2",
-    "request": "^2.88.0",
-    "rpc-websockets": "^3.5.0",
-    "mysql": "2.x",
-    "passport": "0.3.x",
-    "passport-google-oauth": "0.2.x",
-    "cookie-parser": "1.4.x",
-    "express-session": "1.15.x",
-    "express": "4.x",
-    "async": "2.1.4",
-    "compression": "1.x.x",
-    "body-parser": "1.x.x",
-    "method-override": "2.3.x",
+    "axios": "0.x.x",
     "influx": "5.x.x"
 
   }
