@@ -1,5 +1,5 @@
 {
-  "name": "Fronius 2 InfluxDB",
+  "name": "Fronius_2_InfluxDB",
   "version": "0.0.1",
   "description": "Logs Fronius to INFLUXDB",
   "main": "logData.js",
