@@ -51,21 +51,19 @@ var Meter = function() {
    };
 
    this.getPAC = function(cb) {
-      call(fronius_api.GetInverterRealtimeData, function(err, response, body) {
+      call(fronius_api.GetInverterRealtimeData, function(err, data) {
          if (config.log) {
             console.log('> IP ' + config.meter.host + '...');
          }
-         var data = JSON.parse(body);
          cb(data.Body.Data.PAC.Values['1']);
       });
    };
 
    this.getInverter = function(cb) {
-      call(fronius_api.GetInverterRealtimeData, function(err, body) {
+      call(fronius_api.GetInverterRealtimeData, function(err, data) {
          if (config.log) {
             console.log('> IP ' + config.meter.host + '...');
          }
-         var data = JSON.parse(body);
          if (config.log) {
             console.log(data.Body.Data.DAY_ENERGY);
          }
@@ -74,8 +72,7 @@ var Meter = function() {
    };
 
    this.getGrid = function(cb) {
-      call(fronius_api.GetMeterRealtimeData, function(err, body) {
-         var data = JSON.parse(body);
+      call(fronius_api.GetMeterRealtimeData, function(err, data) {
          if (config.log) {
             console.log(data.Body.Data['0']);
          }
