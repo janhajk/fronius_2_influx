@@ -1,8 +1,8 @@
 {
-  "name": "pv_miner_claymore",
+  "name": "Fronius 2 InfluxDB",
   "version": "0.0.1",
-  "description": "Uses unused power to mine (Fronius/Claymore)",
-  "main": "app.js",
+  "description": "Logs Fronius to INFLUXDB",
+  "main": "logData.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
