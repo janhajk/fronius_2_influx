@@ -32,17 +32,6 @@ const influx = new Influx.InfluxDB({
 });
 
 
-influx.ping(5000).then(hosts => {
-  hosts.forEach(host => {
-    if (host.online) {
-      console.log(`${host.url.host} responded in ${host.rtt}ms running ${host.version})`);
-    } else {
-      console.log(`${host.url.host} is offline :(`);
-    }
-  })
-});
-
-
 let writeData = function() {
       meter.getInverter(function(dataInverter) {
             meter.getGrid(function(grid) {
@@ -63,6 +52,17 @@ let writeData = function() {
                         )
                         .catch(err => {
                               console.error("Error writing data to Influx.");
+                              console.error(err);
+                              influx.ping(5000).then(hosts => {
+                                    hosts.forEach(host => {
+                                          if (host.online) {
+                                                console.log(`${host.url.host} responded in ${host.rtt}ms running ${host.version})`);
+                                          }
+                                          else {
+                                                console.log(`${host.url.host} is offline :(`);
+                                          }
+                                    })
+                              });
                         });
             });
       });
