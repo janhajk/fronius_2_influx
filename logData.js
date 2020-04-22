@@ -14,7 +14,7 @@ const config = {
 
 
 const influx = new Influx.InfluxDB({
-      host: config.influxdb.host + ':' + config.influxdb.port,
+      host: 'http://' + config.influxdb.host + ':' + config.influxdb.port,
       database: config.influxdb.db,
       username: config.influxdb.user,
       password: config.influxdb.password,
