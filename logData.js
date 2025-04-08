@@ -2,6 +2,9 @@ const http = require('http');
 const Influx1x = require('influx'); // Für InfluxDB 1.x
 const { InfluxDB: Influx2x, Point } = require('@influxdata/influxdb-client'); // Für InfluxDB 2.x
 
+// Hilfsfunktion, um leere Strings oder Strings mit nur Leerzeichen zu ignorieren
+const isEmptyOrWhitespace = (str) => !str || /^\s*$/.test(str);
+
 // Konfiguration aus Umgebungsvariablen
 const config = {
   meter: {
@@ -19,26 +22,18 @@ const froniusApi = {
 // InfluxDB-Client dynamisch initialisieren
 let influxClient, writeData;
 
-if (process.env.INFLUX_TOKEN && process.env.INFLUX_ORG && process.env.INFLUX_BUCKET) {
-  // InfluxDB 2.x
-  console.log('Using InfluxDB 2.x');
-  const influx2x = new Influx2x({
-    url: `http://${process.env.INFLUX_HOST}:${process.env.INFLUX_PORT}`,
-    token: process.env.INFLUX_TOKEN,
-  });
-  influxClient = influx2x.getWriteApi(process.env.INFLUX_ORG, process.env.INFLUX_BUCKET);
-  writeData = async (data) => {
-    const point = new Point('powerdata')
-      .floatField('pac', data.pac)
-      .floatField('grid', data.grid)
-      .floatField('total', data.pac + data.grid)
-      .floatField('day_energy', data.day_energy);
-    await influxClient.writePoint(point);
-    if (config.log) console.log('Wrote data to InfluxDB 2.x');
-  };
-} else if (process.env.INFLUX_USER && process.env.INFLUX_PSW && process.env.INFLUX_DB) {
+// Prüfe, ob die Variablen tatsächlich gesetzt sind (ignoriere Leerzeichen)
+const hasInflux1xConfig = !isEmptyOrWhitespace(process.env.INFLUX_USER) && 
+                         !isEmptyOrWhitespace(process.env.INFLUX_PSW) && 
+                         !isEmptyOrWhitespace(process.env.INFLUX_DB);
+const hasInflux2xConfig = !isEmptyOrWhitespace(process.env.INFLUX_TOKEN) && 
+                         !isEmptyOrWhitespace(process.env.INFLUX_ORG) && 
+                         !isEmptyOrWhitespace(process.env.INFLUX_BUCKET);
+
+// Entscheide basierend auf INFLUX_VERSION
+if (process.env.INFLUX_VERSION === '1' && hasInflux1xConfig) {
   // InfluxDB 1.x
-  console.log('Using InfluxDB 1.x');
+  console.log('Using InfluxDB 1.x (explicitly set via INFLUX_VERSION)');
   influxClient = new Influx1x.InfluxDB({
     host: process.env.INFLUX_HOST,
     port: process.env.INFLUX_PORT,
@@ -71,6 +66,76 @@ if (process.env.INFLUX_TOKEN && process.env.INFLUX_ORG && process.env.INFLUX_BUC
       },
     ]);
     if (config.log) console.log('Wrote data to InfluxDB 1.x');
+  };
+} else if (process.env.INFLUX_VERSION === '2' && hasInflux2xConfig) {
+  // InfluxDB 2.x
+  console.log('Using InfluxDB 2.x (explicitly set via INFLUX_VERSION)');
+  const influx2x = new Influx2x({
+    url: `http://${process.env.INFLUX_HOST}:${process.env.INFLUX_PORT}`,
+    token: process.env.INFLUX_TOKEN,
+  });
+  influxClient = influx2x.getWriteApi(process.env.INFLUX_ORG, process.env.INFLUX_BUCKET);
+  writeData = async (data) => {
+    const point = new Point('powerdata')
+      .floatField('pac', data.pac)
+      .floatField('grid', data.grid)
+      .floatField('total', data.pac + data.grid)
+      .floatField('day_energy', data.day_energy);
+    await influxClient.writePoint(point);
+    if (config.log) console.log('Wrote data to InfluxDB 2.x');
+  };
+} else if (hasInflux1xConfig) {
+  // Fallback: Verwende 1.x, wenn Konfiguration vorhanden ist
+  console.log('Using InfluxDB 1.x (fallback)');
+  influxClient = new Influx1x.InfluxDB({
+    host: process.env.INFLUX_HOST,
+    port: process.env.INFLUX_PORT,
+    username: process.env.INFLUX_USER,
+    password: process.env.INFLUX_PSW,
+    database: process.env.INFLUX_DB,
+    schema: [
+      {
+        measurement: 'powerdata',
+        fields: {
+          pac: Influx1x.FieldType.FLOAT,
+          grid: Influx1x.FieldType.FLOAT,
+          total: Influx1x.FieldType.FLOAT,
+          day_energy: Influx1x.FieldType.FLOAT,
+        },
+        tags: [],
+      },
+    ],
+  });
+  writeData = async (data) => {
+    await influxClient.writePoints([
+      {
+        measurement: 'powerdata',
+        fields: {
+          pac: data.pac,
+          grid: data.grid,
+          total: data.pac + data.grid,
+          day_energy: data.day_energy,
+        },
+      },
+    ]);
+    if (config.log) console.log('Wrote data to InfluxDB 1.x');
+  };
+} else if (hasInflux2xConfig) {
+  // Fallback: Verwende 2.x, wenn Konfiguration vorhanden ist
+  console.log('Using InfluxDB 2.x (fallback)');
+  const influx2x = new Influx2x({
+    url: `http://${process.env.INFLUX_HOST}:${process.env.INFLUX_PORT}`,
+    token: process.env.INFLUX_TOKEN,
+  });
+  influxClient = influx2x.getWriteApi(process.env.INFLUX_ORG, process.env.INFLUX_BUCKET);
+  writeData = async (data) => {
+    const point = new Point('powerdata')
+      .floatField('pac', data.pac)
+      .floatField('grid', data.grid)
+      .floatField('total', data.pac + data.grid)
+      .floatField('day_energy', data.day_energy);
+    await influxClient.writePoint(point);
+    if (config.log) console.log('Wrote data to InfluxDB 2.x');
   };
 } else {
   console.warn('No valid InfluxDB configuration provided.');
