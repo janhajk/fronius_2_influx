@@ -5,7 +5,7 @@ const { InfluxDB: Influx2x, Point } = require('@influxdata/influxdb-client'); //
 // Konfiguration aus Umgebungsvariablen
 const config = {
   meter: {
-    host: process.env.APIOKEX_KEY, // Host des Fronius-Geräts
+    host: process.env.FRONIUS_IP, // Host des Fronius-Geräts
   },
   log: process.env.LOG === 'true', // Log-Flag als Boolean
 };
