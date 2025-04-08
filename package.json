@@ -1,7 +1,7 @@
 {
   "name": "Fronius_2_InfluxDB",
   "version": "0.0.1",
-  "description": "Logs Fronius to INFLUXDB",
+  "description": "Logs Fronius to InfluxDB",
   "main": "logData.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,7 +9,7 @@
   "author": "janhajk@gmail.com",
   "private": true,
   "dependencies": {
-    "influx": "5.x.x",
-    "axios": "0.x.x"
+    "influx": "^5.9.3",                 // Für InfluxDB 1.x
+    "@influxdata/influxdb-client": "^1.33.2"  // Für InfluxDB 2.x
   }
 }
